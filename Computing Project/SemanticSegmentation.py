@@ -1,50 +1,34 @@
+import PIL
+from PIL import Image
+PIL.PILLOW_VERSION = PIL.__version__
+
 from torchvision import models
 fcn = models.segmentation.fcn_resnet101(pretrained=True).eval()
 
-from PIL import Image
+
 import matplotlib.pyplot as plt
 import torch
 import torchvision.transforms as T
+from imageio import imread, imsave
 import numpy as np
 
 
-
-img = Image.open('./download.jpeg')
-plt.imshow(img)
-plt.show()
-
-# Transformations
-trf = T.Compose([T.Resize(256),
-                 T.CenterCrop(224),
-                 T.ToTensor(),
-                 T.Normalize(mean = [0.485, 0.456, 0.406],
-                             std = [0.229, 0.224, 0.225])])
-inp = trf(img).unsqueeze(0)
-
-# Forward Pass
-out = fcn(inp)['out']
-print(out.shape)
-
-# Checking max index
-om = torch.argmax(out.squeeze(), dim=0).detach().cpu().numpy()
-print(om.shape)
-# Picture of dog has class pixel position
-print(np.unique(om))
-
-
+# Creates the colour maps for each important classes such as Dog, Cat, Person
 def decode_segmap(image, nc=21):
 
-    label_colours = np.array([(0,0,0), (128,0,0), (0,128,0),
-                              (128,128,0), (0,0,128), (128,0,128),
-                              (0,128,128), (128,128,128), (64,0,0),
-                              (192,0,0), (64,128,0), (192,128,0), (64,0,128),
-                              (192,0,128), (64,128,128), (192,128,128), (0,64,0),
-                              (128,64,0), (0,192,0), (128,192,0), (0,64,128)])
+    # Class colours for the layers in this case they will be all black for binarization purposes
+    label_colours = np.array([(255,255,255), (0,0,0), (0,0,0),
+                              (0,0,0), (0,0,0), (0,0,0),
+                              (0,0,0), (0,0,0), (0,0,0),
+                              (0,0,0), (0,0,0), (0,0,0), (0,0,0),
+                              (0,0,0), (0,0,0), (0,0,0), (0,0,0),
+                              (0,0,0), (0,0,0), (0,0,0), (0,0,0)])
 
     r = np.zeros_like(image).astype(np.uint8)
     g = np.zeros_like(image).astype(np.uint8)
     b = np.zeros_like(image).astype(np.uint8)
 
+    # Assigns the matrix of the image with the label colours
     for l in range(0, nc):
         idx = image == l
         r[idx] = label_colours[l, 0]
@@ -55,12 +39,12 @@ def decode_segmap(image, nc=21):
     return rgb
 
 
-def segment(net, path):
+def segment(net, path, height, width):
     img = Image.open(path)
-    plt.imshow(img); plt.axis('off'); plt.show()
+    #plt.imshow(img); plt.axis('off'); plt.show()
 
-    trf = T.Compose([T.Resize(256),
-                     T.CenterCrop(224),
+    # Resizes the image to the product's width and height and turns it into a tensor
+    trf = T.Compose([T.Resize((height, width)),
                      T.ToTensor(),
                      T.Normalize(mean = [0.485, 0.456, 0.406],
                                  std = [0.229, 0.224, 0.225])])
@@ -69,9 +53,10 @@ def segment(net, path):
     out = net(inp)['out']
     om = torch.argmax(out.squeeze(), dim=0).detach().cpu().numpy()
     rgb = decode_segmap(om)
-    plt.imshow(rgb); plt.axis('off'); plt.show()
+    #plt.imshow(rgb); plt.axis('off'); plt.show()
+    imsave('Masks/auto.jpg', rgb)
 
 
-segment(fcn, './cat.jpeg')
+#segment(fcn, './jayson.jpg')
 
 
