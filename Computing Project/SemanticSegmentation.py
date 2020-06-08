@@ -17,12 +17,15 @@ import numpy as np
 def decode_segmap(image, nc=21):
 
     # Class colours for the layers in this case they will be all black for binarization purposes
-    label_colours = np.array([(255,255,255), (0,0,0), (0,0,0),
-                              (0,0,0), (0,0,0), (0,0,0),
-                              (0,0,0), (0,0,0), (0,0,0),
-                              (0,0,0), (0,0,0), (0,0,0), (0,0,0),
-                              (0,0,0), (0,0,0), (0,0,0), (0,0,0),
-                              (0,0,0), (0,0,0), (0,0,0), (0,0,0)])
+    label_colours = np.array([(255,255,255), # background
+                              # 1=aeroplane, 2=bicycle, 3=bird, 4=boat, 5=bottle
+                              (0,0,0), (0,0,0), (0,0,0), (0,0,0), (0,0,0),
+                              # 6=bus, 7=car, 8=cat, 9=chair, 10=cow 11=dining table
+                              (0,0,0), (0,0,0), (0,0,0), (0,0,0), (0,0,0), 
+                              # 12=dog, 13=horse, 14=motorbike, 15=person, 16=potted plant
+                              (0,0,0), (0,0,0), (0,0,0), (0,0,0), (0,0,0), 
+                              # 17=sheep, 18=sofa, 19=train, 20=tv/monitor
+                              (0,0,0), (0,0,0), (0,0,0), (0,0,0), (0,0,0)])
 
     r = np.zeros_like(image).astype(np.uint8)
     g = np.zeros_like(image).astype(np.uint8)
@@ -43,7 +46,7 @@ def segment(net, path, height, width):
     img = Image.open(path)
     #plt.imshow(img); plt.axis('off'); plt.show()
 
-    # Resizes the image to the product's width and height and turns it into a tensor
+    # Resizes the image to the product's width and height and turns it into a tensor and normalized
     trf = T.Compose([T.Resize((height, width)),
                      T.ToTensor(),
                      T.Normalize(mean = [0.485, 0.456, 0.406],
@@ -56,7 +59,5 @@ def segment(net, path, height, width):
     #plt.imshow(rgb); plt.axis('off'); plt.show()
     imsave('Masks/auto.jpg', rgb)
 
-
-#segment(fcn, './jayson.jpg')
 
 

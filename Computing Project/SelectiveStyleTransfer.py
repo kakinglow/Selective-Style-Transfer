@@ -6,6 +6,7 @@ Created on Thu May  7 15:11:35 2020
 """
 
 from PyQt5 import QtWidgets, QtGui, QtCore
+import qdarkstyle
 from PyQt5.QtWidgets import QApplication, QMenuBar, QMenu, QAction, QFileDialog, QLabel, QMessageBox
 from PyQt5.QtGui import QIcon, QImage, QPainter, QPen
 from PyQt5.QtCore import Qt, QPoint
@@ -246,10 +247,12 @@ class MainWindow(QtWidgets.QMainWindow):
         # Reloads the content image in preparation of mask transfer
         contentName, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "JPEG(*.jpg *.jpeg);;All Files(*.*) ")
         
+        msg = QMessageBox()
+        msg.setText("The algorithm will now be executed, please wait.")
+        msg.exec_()
         # Runs the mask transfer with the mask image, content image and the vanilla style transfer product
         img = run_mask_transfer('Products/100-stylephoto.jpg', contentName, filePath)
-        product = imread('product.jpg')
-        plt.imshow(product)
+
         
     # Opens the image file of the users choice and performs Style Transfer
     # This is to ensure that the mask image and the product image is the same size
@@ -286,7 +289,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.view.set_image(pixmap, width, height)
             
             msg = QMessageBox()
-            msg.setText("Once region is finalized, File and save the mask.")
+            msg.setText("Once Region is finalized, File and Save the mask.")
             msg.exec_()
         
         else:
@@ -315,6 +318,9 @@ class MainWindow(QtWidgets.QMainWindow):
         msg.exec_()
         styleName, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "JPEG(*.jpg *.jpeg);;All Files(*.*) ")
         
+        msg = QMessageBox()
+        msg.setText("The algorithm will now be executed, please wait.")
+        msg.exec_()
         run_style_transfer(contentName, styleName)
         img = imread('Products/100-stylephoto.jpg')
         plt.imshow(img)
@@ -333,6 +339,9 @@ class MainWindow(QtWidgets.QMainWindow):
         msg.exec_()
         styleName, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "JPEG(*.jpg *.jpeg);;All Files(*.*) ")
         
+        msg = QMessageBox()
+        msg.setText("The algorithm will now be executed, please wait.")
+        msg.exec_()
         width, height = run_style_transfer(contentName, styleName)
         
         # Performs semantic segmentation to get the region of the important region in the image
@@ -345,5 +354,8 @@ class MainWindow(QtWidgets.QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
+    app.setApplicationName("Selective Style Transfer")
+    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
+    window.setWindowIcon(QIcon('icon.png'))
     window.show()
     app.exec()
